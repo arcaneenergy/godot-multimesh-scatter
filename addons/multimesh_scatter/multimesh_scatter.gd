@@ -146,6 +146,8 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		if show_debug_area:
 			_create_debug_area()
+		else:
+			_delete_debug_area()
 	else:
 		set_notify_transform(false)
 		set_ignore_transform_notification(true)
@@ -207,6 +209,7 @@ func _update() -> void:
 
 func scatter() -> void:
 	_rng.state = 0
+	_rng.seed = seed
 
 	multimesh.instance_count = 0
 	multimesh.instance_count = count
