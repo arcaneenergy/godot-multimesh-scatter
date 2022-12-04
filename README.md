@@ -10,14 +10,20 @@
 
 ![random_rotation](https://arcaneenergy.github.io/assets/multimesh_scatter/random_rotation.jpg)
 
+https://user-images.githubusercontent.com/52855634/205499151-2fed5529-d116-400e-817d-a37fefeb8989.mp4
 
-https://arcaneenergy.github.io/assets/multimesh_scatter/video_01.mp4
+https://user-images.githubusercontent.com/52855634/205499155-1d9bd480-21a9-4b51-9225-40db23342474.mp4
 
-https://arcaneenergy.github.io/assets/multimesh_scatter/video_02.mp4
-
-https://arcaneenergy.github.io/assets/multimesh_scatter/video_03.mp4
+https://user-images.githubusercontent.com/52855634/205499157-723e4ab5-bd87-441a-98ba-3b5a482bf655.mp4
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E5CVWWE)
+
+## Features
+
+- Scatter objects in the scene using a MultiMeshInstance node.
+- Adjust the instance count, size, and collision layer.
+- Randomize size and rotation of each instance.
+- Automatically rotates each instance to the normal of the terrain.
 
 ## How to use
 
@@ -40,6 +46,14 @@ https://arcaneenergy.github.io/assets/multimesh_scatter/video_03.mp4
 - `random_rotation`: Rotate each instance by a random amount between. `-random_rotation` and `+random_rotation`.
 - `seed`: A seed to feed for the random number generator.
 - `show_debug_area`: Toggle the visibility of the bounding box area.
+
+## Notes
+
+- The sphere placement type takes `placement_size.x` for the radius. The y and z values are not used.
+- The sphere placement type behaves more like a capsule shape. This means that only the horizontal radius is taken
+  into account when scattering meshes.
+- Scattering occurs automatically in the editor whenever you change a parameter or move the MultiMeshScatter node.
+  In game mode, the scatter occurs once at the beginning of the game.
 
 ## Links
 
