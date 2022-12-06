@@ -6,6 +6,12 @@
 
 <br clear="left" />
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E5CVWWE)
+
+---
+
+**Note: This plugin was created for Godot v4. If you are using Godot 3.5 (or older), you can find the corresponding plugin in the [3.5 branch](https://github.com/arcaneenergy/godot-multimesh-scatter/tree/3.5).**
+
 ---
 
 ![random_rotation](https://arcaneenergy.github.io/assets/multimesh_scatter/random_rotation.jpg)
@@ -15,8 +21,6 @@ https://user-images.githubusercontent.com/52855634/205499151-2fed5529-d116-400e-
 https://user-images.githubusercontent.com/52855634/205499155-1d9bd480-21a9-4b51-9225-40db23342474.mp4
 
 https://user-images.githubusercontent.com/52855634/205499157-723e4ab5-bd87-441a-98ba-3b5a482bf655.mp4
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E5CVWWE)
 
 ## Features
 
