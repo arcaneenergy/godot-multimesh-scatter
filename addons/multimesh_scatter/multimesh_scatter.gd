@@ -132,7 +132,23 @@ enum ScatterType { BOX, SPHERE }
 
 @export_group("Multi Mesh Advanced")
 
-@export_subgroup("Vertex Colors")
+@export_subgroup("Constraints")
+
+## If enabled the scattering will only happen where the collision angle is above the specified threshold.
+## This has a non-negligible impact on scattering speed but no impact once the scattering is done.
+## This will result in less instances than the set [code]count[/code].
+## (Those instances are actually just scaled to 0)
+@export var use_angle: bool = false:
+	get: return use_angle
+	set(value):
+		use_angle = value
+		_update()
+		
+@export_range(0, 1, 0.01) var angle = 1.0:
+	get: return angle
+	set(value):
+		angle = value
+		_update()
 
 ## If enabled the scattering will only happen where vertex color of the surface below the specified threshold.
 ## This has a non-negligible impact on scattering speed but no impact once the scattering is done.
@@ -312,18 +328,23 @@ func scatter() -> void:
 
 		var iteration_scale = base_scale
 
-		# Vertex color check
-		var mesh = find_mesh(hit.collider)
-		if mesh:
-			var mesh_id = mesh.get_instance_id()
-			if not _mesh_data_array.has(mesh_id):
-				var mdt = MeshDataTool.new()
-				mdt.create_from_surface(mesh.mesh, 0)
-				_mesh_data_array[mesh_id] = mdt
-			var color = _mesh_data_array[mesh_id].get_vertex_color(get_closest_vertex(_mesh_data_array[mesh_id], hit.position))
-			if use_vertex_colors:
+		# Constraints Checks
+		if use_angle:
+			var off = (abs(hit.normal.x) + abs(hit.normal.z)) / 2
+			if not off < angle:
+				iteration_scale = Vector3.ZERO
+
+		if iteration_scale > Vector3.ZERO and use_vertex_colors:
+			var mesh = find_mesh(hit.collider)
+			if mesh:
+				var mesh_id = mesh.get_instance_id()
+				if not _mesh_data_array.has(mesh_id):
+					var mdt = MeshDataTool.new()
+					mdt.create_from_surface(mesh.mesh, 0)
+					_mesh_data_array[mesh_id] = mdt
+				var color = _mesh_data_array[mesh_id].get_vertex_color(get_closest_vertex(_mesh_data_array[mesh_id], hit.position))
 				if not (color.r < r_channel && color.g < g_channel && color.b < b_channel):
-					iteration_scale = 0
+					iteration_scale = Vector3.ZERO
 		
 		var t := Transform3D(
 			Basis(
