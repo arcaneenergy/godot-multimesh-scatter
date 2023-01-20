@@ -28,8 +28,11 @@ https://user-images.githubusercontent.com/52855634/205499157-723e4ab5-bd87-441a-
 - Adjust the instance count, size, and collision layer.
 - Randomize size and rotation of each instance.
 - Automatically rotates each instance to the normal of the terrain.
+- Advanced constraint options to scatter according to:
+  - Vertex color
+  - Terrain Angle
 
-## How to use
+## How to use!
 
 1. Download this [repository](https://github.com/arcaneenergy/godot-multimesh-scatter) or download the addon from the AsseLib in Godot.
 2. Import the addons folder into your project.
