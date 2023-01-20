@@ -52,6 +52,8 @@ https://user-images.githubusercontent.com/52855634/205499157-723e4ab5-bd87-441a-
 - `max_random_size`: The maximum random size for each instance.
 - `random_rotation`: Rotate each instance by a random amount between. `-random_rotation` and `+random_rotation`.
 ### Advanced
+- `use_angle`: If enabled the scattering will only happen where the collision angle is above the specified threshold. (See Below)
+- `angle`: The maximum angle allowed for object to be added. Lower this to prevent scattering on more vertical surfaces.
 - `use_vertex_colors`: If enabled the scattering will only happen where vertex color of the surface below the specified threshold. (See Below)
 - `r_channel`: Scatter threshold for the red channel.
 - `g_channel`: Scatter threshold for the green channel.
