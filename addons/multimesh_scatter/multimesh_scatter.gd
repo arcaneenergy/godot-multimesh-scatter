@@ -379,7 +379,6 @@ func get_closest_vertex(mdt: MeshDataTool, mesh_pos: Vector3, hit_pos: Vector3):
 	
 	return closest_vertex
 
-# Search up and down the tree until a mesh is found (dumb)
 func find_mesh(node) -> MeshInstance3D:
 	for c in node.get_children():
 		return c if c is MeshInstance3D else find_mesh(c)
