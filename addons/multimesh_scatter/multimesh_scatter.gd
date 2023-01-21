@@ -343,7 +343,7 @@ func scatter() -> void:
 					mdt.create_from_surface(mesh.mesh, 0)
 					_mesh_data_array[mesh_id] = mdt
 				var color = _mesh_data_array[mesh_id].get_vertex_color(get_closest_vertex(_mesh_data_array[mesh_id], mesh.global_transform.origin, hit.position))
-				if not (color.r < r_channel && color.g < g_channel && color.b < b_channel):
+				if not (color.r <= r_channel && color.g <= g_channel && color.b <= b_channel):
 					iteration_scale = Vector3.ZERO
 		
 		var t := Transform3D(
