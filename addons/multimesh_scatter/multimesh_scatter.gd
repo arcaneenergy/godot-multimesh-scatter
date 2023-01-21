@@ -342,8 +342,8 @@ func scatter() -> void:
 					var mdt = MeshDataTool.new()
 					mdt.create_from_surface(mesh.mesh, 0)
 					_mesh_data_array[mesh_id] = mdt
-				var color = _mesh_data_array[mesh_id].get_vertex_color(get_closest_vertex(_mesh_data_array[mesh_id], hit.position))
-				if not (color.r <= r_channel && color.g <= g_channel && color.b <= b_channel):
+				var color = _mesh_data_array[mesh_id].get_vertex_color(get_closest_vertex(_mesh_data_array[mesh_id], mesh.global_transform.origin, hit.position))
+				if not (color.r < r_channel && color.g < g_channel && color.b < b_channel):
 					iteration_scale = Vector3.ZERO
 		
 		var t := Transform3D(
@@ -364,13 +364,13 @@ func scatter() -> void:
 		t.origin = hit.position - global_position + offset_position
 		multimesh.set_instance_transform(i, t)
 
-func get_closest_vertex(mdt: MeshDataTool, pos: Vector3):
+func get_closest_vertex(mdt: MeshDataTool, mesh_pos: Vector3, hit_pos: Vector3):
 	var closest_dist = INF
 	var closest_vertex = -1
 
 	for v in range(mdt.get_vertex_count()):
-		var v_pos = mdt.get_vertex(v)
-		var tmp = pos.distance_squared_to(v_pos)
+		var v_pos = mdt.get_vertex(v) + mesh_pos
+		var tmp = hit_pos.distance_squared_to(v_pos)
 		if (tmp <= closest_dist):
 			closest_dist = tmp
 			closest_vertex = v
