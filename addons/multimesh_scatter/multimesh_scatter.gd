@@ -345,6 +345,8 @@ func scatter() -> void:
 				var color = _mesh_data_array[mesh_id].get_vertex_color(get_closest_vertex(_mesh_data_array[mesh_id], mesh.global_transform.origin, hit.position))
 				if not (color.r <= r_channel && color.g <= g_channel && color.b <= b_channel):
 					iteration_scale = Vector3.ZERO
+			else:
+				print("MultiMeshScatter: Cannot find Mesh for Vertex Color check. Make sure the collider '" + hit.collider.name + "' has a Mesh in it's children. It should also have only one.")
 		
 		var t := Transform3D(
 			Basis(
@@ -379,17 +381,6 @@ func get_closest_vertex(mdt: MeshDataTool, mesh_pos: Vector3, hit_pos: Vector3):
 
 # Search up and down the tree until a mesh is found (dumb)
 func find_mesh(node) -> MeshInstance3D:
-	if node is MeshInstance3D: return node
-	var up = find_mesh_in_parent(node)
-	var down = find_mesh_in_children(node)
-	return down if down else up if up else null
-
-func find_mesh_in_parent(node):
-	var p = node.get_parent()
-	if p == null: return p
-	return p if p is MeshInstance3D else find_mesh_in_parent(p)
-
-func find_mesh_in_children(node):
 	for c in node.get_children():
-		return c if c is MeshInstance3D else find_mesh_in_children(c)
+		return c if c is MeshInstance3D else find_mesh(c)
 	return null
