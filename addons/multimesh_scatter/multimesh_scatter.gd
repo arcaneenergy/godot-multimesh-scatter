@@ -289,18 +289,18 @@ func _update_debug_area_size() -> void:
 			ScatterType.BOX, _:
 				_debug_draw_instance.mesh.size = scatter_size
 
-func _update(force: bool = false) -> void:
+func _update(force := false) -> void:
 	if !_space: return
 	scatter(force)
 
 	if Engine.is_editor_hint():
 		_update_debug_area_size()
 
-func scatter(force: bool = false) -> void:
+func scatter(force := false) -> void:
 	if use_vertex_colors and not force:
 		return
-	
-	if not _ensure_has_mm(): 
+
+	if not _ensure_has_mm():
 		printerr("[MultiMeshScatter]: The MultiMeshInstance3D doesn't have an assigned mesh.")
 		return
 
@@ -334,7 +334,7 @@ func scatter(force: bool = false) -> void:
 		var hit := _space.intersect_ray(ray)
 		if hit.is_empty(): continue
 
-		var iteration_scale = base_scale
+		var iteration_scale := base_scale
 
 		# Angle constraints check
 		if use_angle:
@@ -351,11 +351,11 @@ func scatter(force: bool = false) -> void:
 					var mdt := MeshDataTool.new()
 					mdt.create_from_surface(mesh.mesh, 0)
 					_mesh_data_array[mesh_id] = mdt
-				var color = _mesh_data_array[mesh_id].get_vertex_color(_get_closest_vertex(_mesh_data_array[mesh_id], mesh.global_transform.origin, hit.position))
+				var color: Color = _mesh_data_array[mesh_id].get_vertex_color(_get_closest_vertex(_mesh_data_array[mesh_id], mesh.global_transform.origin, hit.position))
 				if not (color.r <= r_channel && color.g <= g_channel && color.b <= b_channel):
 					iteration_scale = Vector3.ZERO
 			else:
-				printerr("[MultiMeshScatter]: Cannot find mesh for the vertex color check. Make sure '", hit.collider.name, "' has a MeshInstance3D as a child.")
+				printerr("[MultiMeshScatter]: Cannot find mesh for the vertex color check. Make sure '", hit.collider.name, "' has a MeshInstance3D as a parent.")
 
 		var t := Transform3D(
 			Basis(
@@ -389,6 +389,6 @@ func _get_closest_vertex(mdt: MeshDataTool, mesh_pos: Vector3, hit_pos: Vector3)
 	return closest_vertex
 
 func _find_mesh(node: Node) -> MeshInstance3D:
-	var p = node.get_parent()
+	var p := node.get_parent()
 	if p == null: return p
 	return p if p is MeshInstance3D else _find_mesh(p)
