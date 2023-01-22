@@ -307,6 +307,7 @@ func scatter(force := false) -> void:
 	_rng.state = 0
 	_rng.seed = seed
 
+	multimesh.instance_count = 0
 	multimesh.instance_count = count
 
 	for i in range(count):
