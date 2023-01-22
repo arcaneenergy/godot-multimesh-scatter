@@ -28,6 +28,9 @@ https://user-images.githubusercontent.com/52855634/205499157-723e4ab5-bd87-441a-
 - Adjust the instance count, size, and collision layer.
 - Randomize size and rotation of each instance.
 - Automatically rotates each instance to the normal of the terrain.
+- Advanced constraint options to scatter according to:
+  - Vertex color
+  - Terrain Angle
 
 ## How to use
 
@@ -38,16 +41,27 @@ https://user-images.githubusercontent.com/52855634/205499157-723e4ab5-bd87-441a-
 
 ## Parameters
 
+### Scattering
 - `count`: The number of instances to generate.
-- `placement_type`: Defines the placement type.
-- `placement_size`: The placement size of the bounding box. Enable `show_debug_area` to view the size of the bounding box. Note: If the `placement_type` is set to Sphere, only the x value will be used to specify the radius of the sphere.
+- `scatter_type`: Defines the scatter type. (Box / Sphere)
+- `scatter_size`: The size of the bounding box. Enable `show_debug_area` to view the size of the bounding box. Note: If the `scatter_type` is set to Sphere, only the x value will be used to specify the radius of the sphere.
 - `collision_mask`: The physics collision mask that the instances should collide with.
+- `mesh_instance`: A helper parameter, set a MeshInstance3D here and it's mesh will be used for scattering (avoids having to copy/paste)
+### Placement
 - `offset_position`: Add an offset to the placed instances.
 - `offset_rotation`: Add a rotation offset to the placed instances.
 - `base_scale`: Change the base scale of the instanced meshes.
 - `min_random_size`: The minimum random size for each instance.
 - `max_random_size`: The maximum random size for each instance.
 - `random_rotation`: Rotate each instance by a random amount between. `-random_rotation` and `+random_rotation`.
+### Advanced
+- `use_angle`: If enabled the scattering will only happen where the collision angle is above the specified threshold. (See Below)
+- `angle`: The maximum angle allowed for object to be added. Lower this to prevent scattering on more vertical surfaces.
+- `use_vertex_colors`: If enabled the scattering will only happen where vertex color of the surface below the specified threshold. (See Below)
+- `r_channel`: Scatter threshold for the red channel.
+- `g_channel`: Scatter threshold for the green channel.
+- `b_channel`: Scatter threshold for the blue channel. 
+- `randomize_seed`: Enabling this will randomize the seed then turn this off again (kind of a button in the editor)
 - `seed`: A seed to feed for the random number generator.
 - `show_debug_area`: Toggle the visibility of the bounding box area.
 
