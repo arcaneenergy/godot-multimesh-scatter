@@ -148,13 +148,15 @@ enum ScatterType { BOX, SPHERE }
 @export_subgroup("Vertex Color Placement")
 
 ## If enabled the scattering will only happen where vertex color of the surface below the specified threshold.
-## This has a non-negligible impact on scattering speed but no impact once the scattering is done.
+## Note that this can be very expensive. You will need to use Advanced Settings > Debug > Manual Update to update the scattering.
 ## This will result in less instances than the set [code]count[/code].
 ## (Those instances are actually just scaled to 0)
 @export var use_vertex_colors: bool = false:
 	get: return use_vertex_colors
 	set(value):
 		use_vertex_colors = value
+		if value:
+			print("[MultiMeshScatter]: Enabling vertex color checks, from now on you will need to manually update the scattering in Advanced Settings > Debug > Manual Update.")
 		_update()
 
 ## Scatter threshold for the red channel.
@@ -207,6 +209,12 @@ enum ScatterType { BOX, SPHERE }
 			_create_debug_area()
 		else:
 			_delete_debug_area()
+
+@export var manual_update := false:
+	get: return manual_update
+	set(value):
+		_update(true)
+		manual_update = false
 
 var _debug_draw_instance: MeshInstance3D
 var _rng := RandomNumberGenerator.new()
@@ -281,15 +289,18 @@ func _update_debug_area_size() -> void:
 			ScatterType.BOX, _:
 				_debug_draw_instance.mesh.size = scatter_size
 
-func _update() -> void:
+func _update(force: bool = false) -> void:
 	if !_space: return
-	scatter()
+	scatter(force)
 
 	if Engine.is_editor_hint():
 		_update_debug_area_size()
 
-func scatter() -> void:
-	if not _ensure_has_mm():
+func scatter(force: bool = false) -> void:
+	if use_vertex_colors and not force:
+		return
+	
+	if not _ensure_has_mm(): 
 		printerr("[MultiMeshScatter]: The MultiMeshInstance3D doesn't have an assigned mesh.")
 		return
 
@@ -378,6 +389,6 @@ func _get_closest_vertex(mdt: MeshDataTool, mesh_pos: Vector3, hit_pos: Vector3)
 	return closest_vertex
 
 func _find_mesh(node: Node) -> MeshInstance3D:
-	for c in node.get_children():
-		return c if c is MeshInstance3D else _find_mesh(c)
-	return null
+	var p = node.get_parent()
+	if p == null: return p
+	return p if p is MeshInstance3D else _find_mesh(p)
