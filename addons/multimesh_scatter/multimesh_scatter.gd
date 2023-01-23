@@ -211,7 +211,7 @@ enum ScatterType { BOX, SPHERE }
 @export_group("Chunks")
 
 ## The node used to contain the created chunks.
-var chunk_container: Node3D
+var _chunk_container: Node3D
 
 ## The number of instances for each chunk.
 @export var count_per_chunk := 100:
@@ -225,25 +225,25 @@ var chunk_container: Node3D
 	set(value):
 		total_size = value.clamp(Vector3.ONE * 0.0, Vector3.ONE * 10000.0)
 
-## The amount of chunks on each axis
-@export var chunk_count := Vector2(10.0, 10.0):
+## The amount of chunks on each axis.
+@export var chunk_count := Vector2i(8, 8):
 	get: return chunk_count
 	set(value):
-		chunk_count = value.clamp(Vector2.ONE * 0.0, Vector2.ONE * 10000.0)
-		
-## Click to split the current MultiMeshScatter into multiple smaller instances
+		chunk_count = value.clamp(Vector2i.ONE * 1, Vector2i.ONE * 1000)
+
+## Click to split the current MultiMeshScatter into multiple smaller instances.
 @export var generate_chunks := false:
 	get: return generate_chunks
 	set(value):
 		generate_chunks = false
 		if value: _chunkify()
-		
+
 ## Click to delete the chunks and re-enable the base MultiMeshScatter.
 @export var delete_chunks := false:
 	get: return delete_chunks
 	set(value):
 		delete_chunks = false
-		if value: 
+		if value:
 			_delete_chunks()
 			visible = true
 
@@ -381,7 +381,7 @@ func scatter(force := false) -> void:
 	multimesh.instance_count = count
 
 	for i in range(count):
-		var offset = Vector3.ZERO
+		var offset := Vector3.ZERO
 
 		match scatter_type:
 			ScatterType.SPHERE:
@@ -396,9 +396,9 @@ func scatter(force := false) -> void:
 					_rng.randf_range(-scatter_size.x / 2.0, scatter_size.x / 2.0),
 					0.0,
 					_rng.randf_range(-scatter_size.z / 2.0, scatter_size.z / 2.0))
-					
-		var pos = global_position + offset
-		
+
+		var pos := global_position + offset
+
 		if _rng.randf() <= clustering_amount:
 			if cluster_out_of_bounds:
 				pos = _last_pos + offset * (1 - cluster_density)
@@ -406,7 +406,7 @@ func scatter(force := false) -> void:
 				pos = _last_pos + ((pos - _last_pos) * (1 - cluster_density))
 		else:
 			_last_pos = pos
-		
+
 		var ray := PhysicsRayQueryParameters3D.create(
 			pos + Vector3.UP * (scatter_size.y / 2.0),
 			pos + Vector3.DOWN * (scatter_size.y / 2.0),
@@ -475,58 +475,61 @@ func _find_mesh(node: Node) -> MeshInstance3D:
 	return p if p is MeshInstance3D else _find_mesh(p)
 
 func _chunkify() -> void:
-	var container = _get_chunk_container()
+	var container := _get_chunk_container()
 	if not container:
 		printerr("[MultiMeshScatter]: No container found for the chunks.")
 		return
+
 	_empty_chunks()
-	visible = true;
-	var chunks = []
-	var size = Vector2(total_size.x / chunk_count.x, total_size.z / chunk_count.y)
+	visible = true
+
+	var chunks := []
+	var size := Vector2(total_size.x / chunk_count.x, total_size.z / chunk_count.y)
 	for i in chunk_count.x:
 		for j in chunk_count.y:
-			var chunk = duplicate()
+			var chunk := duplicate()
 			chunk.multimesh = null
-			
+
 			chunk.set_meta('pos', Vector3(
 				global_transform.origin.x + (i * size.x) - (total_size.x/2) + (size.x/2),
 				global_transform.origin.y,
 				global_transform.origin.z + (j * size.y) - (total_size.z/2) + (size.y/2)
 			))
-			
+
 			chunk._ensure_has_mm()
 			chunk.multimesh.mesh = multimesh.mesh
-			
+
 			chunk.count = count_per_chunk
 			chunk.scatter_size = Vector3(size.x, scatter_size.y, size.y)
-			
+
 			chunks.push_back(chunk)
-	visible = false;
+
+	visible = false
 	for chunk in chunks:
 		container.add_child(chunk)
 		chunk.owner = container.owner
-		chunk.global_transform.origin = chunk.get_meta('pos')
+		chunk.global_transform.origin = chunk.get_meta("pos")
 		chunk.randomize_seed = true
 		if use_vertex_colors:
 			chunk.manual_update = true
 
 func _get_chunk_container() -> Node3D:
-	if not chunk_container or not chunk_container.get_parent():
-		chunk_container = Node3D.new()
-		chunk_container.name = name + " chunks"
-		get_parent().add_child(chunk_container)
-		chunk_container.owner = owner
-	return chunk_container
+	if not _chunk_container or not _chunk_container.get_parent():
+		_chunk_container = Node3D.new()
+		_chunk_container.name = name + "Chunks"
+		get_parent().add_child(_chunk_container)
+		_chunk_container.owner = owner
+	return _chunk_container
 
 func _empty_chunks() -> void:
-	var container = _get_chunk_container()
+	var container := _get_chunk_container()
 	for c in container.get_children():
 		container.remove_child(c)
 		c.queue_free()
 
 func _delete_chunks() -> void:
 	_empty_chunks()
-	if chunk_container:
-		if chunk_container.is_inside_tree():
-			chunk_container.get_parent().remove_child(chunk_container)
-		chunk_container.queue_free()
+	if _chunk_container:
+		if _chunk_container.is_inside_tree():
+			_chunk_container.get_parent().remove_child(_chunk_container)
+		_chunk_container.queue_free()
