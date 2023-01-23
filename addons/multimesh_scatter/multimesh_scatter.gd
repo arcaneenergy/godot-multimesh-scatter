@@ -123,9 +123,29 @@ enum ScatterType { BOX, SPHERE }
 		random_rotation = value.clamp(Vector3.ONE * 0.00, Vector3.ONE * 180.0)
 		_update()
 
-@export_group("Advanced Settings")
+@export_group("Clustering")
 
-@export_subgroup("Angle Constraints")
+## Clustering will make instances appear in tight groups.
+## At 0, the placement will be entirely random.
+## At 1, all instances will be grouped close to each other, according to [code]cluster_density[/code].
+@export_range(0, 1, 0.01) var clustering_amount = 0.0:
+	get: return clustering_amount
+	set(value):
+		clustering_amount = value
+		_update()
+
+## Higher cluster density means clustered instances will be closer together.
+## At 0 clustering will have no effect.
+## At 1 clustered instances will spawn on top of each other.
+@export_range(0, 1, 0.01) var cluster_density = 0.5:
+	get: return cluster_density
+	set(value):
+		cluster_density = value
+		_update()
+
+@export_group("Constraints")
+
+@export_subgroup("Face Angle")
 
 ## If enabled the scattering will only happen where the collision angle is above the specified threshold.
 ## This has a non-negligible impact on scattering speed but no impact once the scattering is done.
@@ -145,7 +165,7 @@ enum ScatterType { BOX, SPHERE }
 		angle_degrees = value
 		_update()
 
-@export_subgroup("Vertex Color Placement")
+@export_subgroup("Vertex Color")
 
 ## If enabled the scattering will only happen where vertex color of the surface below the specified threshold.
 ## Note that this can be very expensive. You will need to use Advanced Settings > Debug > Manual Update to update the scattering.
@@ -251,6 +271,7 @@ var chunk_container: Node3D
 var _debug_draw_instance: MeshInstance3D
 var _rng := RandomNumberGenerator.new()
 var _mesh_data_array := {}
+var _last_pos: Vector3
 
 @onready var _space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 
@@ -344,20 +365,28 @@ func scatter(force := false) -> void:
 
 	for i in range(count):
 		var pos := global_position
+		var offset = Vector3.ZERO
 
 		match scatter_type:
 			ScatterType.SPHERE:
 				var radius := sqrt(_rng.randf()) * (scatter_size.x / 2.0)
 				var theta := _rng.randf_range(0.0, 360.0)
-				pos += Vector3(
+				offset += Vector3(
 					radius * cos(theta),
 					0.0,
 					radius * sin(theta))
 			ScatterType.BOX, _:
-				pos += Vector3(
+				offset += Vector3(
 					_rng.randf_range(-scatter_size.x / 2.0, scatter_size.x / 2.0),
 					0.0,
 					_rng.randf_range(-scatter_size.z / 2.0, scatter_size.z / 2.0))
+
+		pos += offset
+
+		if _rng.randf() <= clustering_amount:
+			pos = _last_pos + ((pos - _last_pos) * (1.0 - cluster_density))
+		else:
+			_last_pos = pos
 
 		var ray := PhysicsRayQueryParameters3D.create(
 			pos + Vector3.UP * (scatter_size.y / 2.0),
