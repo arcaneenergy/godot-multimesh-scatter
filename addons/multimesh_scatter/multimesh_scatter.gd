@@ -143,9 +143,9 @@ enum ScatterType { BOX, SPHERE }
 		cluster_density = value
 		_update()
 
-## Allow clusters to go outside the bounds desfined by [code]scatter_size[/code]
-## This is useful to avoid grid-like patterns when using multiple scatterers,
-## such as when using the Chunks settings.
+## Allow clusters to go outside the bounds defined by [code]scatter_size[/code]
+## This is useful to avoid grid-like patterns appearing when tiling multiple scatterers,
+## such as when using the [code]Chunks[/code] settings.
 @export var cluster_out_of_bounds := false:
 	get: return cluster_out_of_bounds
 	set(value):
