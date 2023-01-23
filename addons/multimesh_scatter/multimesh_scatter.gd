@@ -462,10 +462,10 @@ func _chunkify() -> void:
 			chunk.manual_update = true
 
 func _get_chunk_container() -> Node3D:
-	if chunk_container: return chunk_container
-	chunk_container = Node3D.new()
-	get_parent().add_child(chunk_container)
-	chunk_container.owner = owner
+	if not chunk_container or not chunk_container.get_parent():
+		chunk_container = Node3D.new()
+		get_parent().add_child(chunk_container)
+		chunk_container.owner = owner
 	return chunk_container
 
 func _empty_chunks() -> void:
