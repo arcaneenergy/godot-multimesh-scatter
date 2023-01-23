@@ -160,7 +160,6 @@ enum ScatterType { BOX, SPHERE }
 ## This has a non-negligible impact on scattering speed but no impact once the scattering is done.
 ## This will result in less instances than the set [code]count[/code].
 ## (Those instances are actually just scaled to 0)
-
 @export var use_angle: bool = false:
 	get: return use_angle
 	set(value):
@@ -238,6 +237,15 @@ var chunk_container: Node3D
 	set(value):
 		generate_chunks = false
 		if value: _chunkify()
+		
+## Click to delete the chunks and re-enable the base MultiMeshScatter.
+@export var delete_chunks := false:
+	get: return delete_chunks
+	set(value):
+		delete_chunks = false
+		if value: 
+			_delete_chunks()
+			visible = true
 
 @export_group("Advanced Settings")
 
@@ -505,6 +513,7 @@ func _chunkify() -> void:
 func _get_chunk_container() -> Node3D:
 	if not chunk_container or not chunk_container.get_parent():
 		chunk_container = Node3D.new()
+		chunk_container.name = name + " chunks"
 		get_parent().add_child(chunk_container)
 		chunk_container.owner = owner
 	return chunk_container
@@ -514,3 +523,10 @@ func _empty_chunks() -> void:
 	for c in container.get_children():
 		container.remove_child(c)
 		c.queue_free()
+
+func _delete_chunks() -> void:
+	_empty_chunks()
+	if chunk_container:
+		if chunk_container.is_inside_tree():
+			chunk_container.get_parent().remove_child(chunk_container)
+		chunk_container.queue_free()
