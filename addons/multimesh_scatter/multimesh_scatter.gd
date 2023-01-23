@@ -50,7 +50,7 @@ enum ScatterType { BOX, SPHERE }
 @export var scatter_size := Vector3(10.0, 10.0, 10.0):
 	get: return scatter_size
 	set(value):
-		scatter_size = value.clamp(Vector3.ONE * 0.01, Vector3.ONE * 100.0)
+		scatter_size = value.clamp(Vector3.ONE * 0.01, Vector3.ONE * 1000.0)
 		_update()
 
 ## The physics collision mask that the instances should collide with.
@@ -179,6 +179,38 @@ enum ScatterType { BOX, SPHERE }
 	set(value):
 		b_channel = value
 		_update()
+
+@export_group("Chunks")
+
+## The node used to contain the created chunks.
+var chunk_container: Node3D
+
+## The number of instances for each chunk.
+@export var count_per_chunk := 100:
+	get: return count_per_chunk
+	set(value):
+		count_per_chunk = value
+
+## The total size of the covered area.
+@export var total_size := Vector3(100.0, 100.0, 100.0):
+	get: return total_size
+	set(value):
+		total_size = value.clamp(Vector3.ONE * 0.0, Vector3.ONE * 10000.0)
+
+## The amount of chunks on each axis
+@export var chunk_count := Vector2(10.0, 10.0):
+	get: return chunk_count
+	set(value):
+		chunk_count = value.clamp(Vector2.ONE * 0.0, Vector2.ONE * 10000.0)
+		
+## Click to split the current MultiMeshScatter into multiple smaller instances
+@export var generate_chunks := false:
+	get: return generate_chunks
+	set(value):
+		generate_chunks = false
+		if value: _chunkify()
+
+@export_group("Advanced Settings")
 
 @export_subgroup("Seed")
 
@@ -393,3 +425,51 @@ func _find_mesh(node: Node) -> MeshInstance3D:
 	var p := node.get_parent()
 	if p == null: return p
 	return p if p is MeshInstance3D else _find_mesh(p)
+
+func _chunkify() -> void:
+	var container = _get_chunk_container()
+	if not container:
+		printerr("[MultiMeshScatter]: No container found for the chunks.")
+		return
+	_empty_chunks()
+	visible = true;
+	var chunks = []
+	var size = Vector2(total_size.x / chunk_count.x, total_size.z / chunk_count.y)
+	for i in chunk_count.x:
+		for j in chunk_count.y:
+			var chunk = duplicate()
+			chunk.multimesh = null
+			
+			chunk.set_meta('pos', Vector3(
+				global_transform.origin.x + (i * size.x) - (total_size.x/2) + (size.x/2),
+				global_transform.origin.y,
+				global_transform.origin.z + (j * size.y) - (total_size.z/2) + (size.y/2)
+			))
+			
+			chunk._ensure_has_mm()
+			chunk.multimesh.mesh = multimesh.mesh
+			
+			chunk.count = count_per_chunk
+			chunk.scatter_size = Vector3(size.x, scatter_size.y, size.y)
+			
+			chunks.push_back(chunk)
+	visible = false;
+	for chunk in chunks:
+		container.add_child(chunk)
+		chunk.owner = container.owner
+		chunk.global_transform.origin = chunk.get_meta('pos')
+		if use_vertex_colors:
+			chunk.manual_update = true
+
+func _get_chunk_container() -> Node3D:
+	if chunk_container: return chunk_container
+	chunk_container = Node3D.new()
+	get_parent().add_child(chunk_container)
+	chunk_container.owner = owner
+	return chunk_container
+
+func _empty_chunks() -> void:
+	var container = _get_chunk_container()
+	for c in container.get_children():
+		container.remove_child(c)
+		c.queue_free()
