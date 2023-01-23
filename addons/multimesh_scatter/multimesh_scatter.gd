@@ -143,6 +143,15 @@ enum ScatterType { BOX, SPHERE }
 		cluster_density = value
 		_update()
 
+## Allow clusters to go outside the bounds desfined by [code]scatter_size[/code]
+## This is useful to avoid grid-like patterns when using multiple scatterers,
+## such as when using the Chunks settings.
+@export var cluster_out_of_bounds := false:
+	get: return cluster_out_of_bounds
+	set(value):
+		cluster_out_of_bounds = value
+		_update()
+
 @export_group("Constraints")
 
 @export_subgroup("Face Angle")
@@ -364,7 +373,6 @@ func scatter(force := false) -> void:
 	multimesh.instance_count = count
 
 	for i in range(count):
-		var pos := global_position
 		var offset = Vector3.ZERO
 
 		match scatter_type:
@@ -380,14 +388,17 @@ func scatter(force := false) -> void:
 					_rng.randf_range(-scatter_size.x / 2.0, scatter_size.x / 2.0),
 					0.0,
 					_rng.randf_range(-scatter_size.z / 2.0, scatter_size.z / 2.0))
-
-		pos += offset
-
+					
+		var pos = global_position + offset
+		
 		if _rng.randf() <= clustering_amount:
-			pos = _last_pos + ((pos - _last_pos) * (1.0 - cluster_density))
+			if cluster_out_of_bounds:
+				pos = _last_pos + offset * (1 - cluster_density)
+			else:
+				pos = _last_pos + ((pos - _last_pos) * (1 - cluster_density))
 		else:
 			_last_pos = pos
-
+		
 		var ray := PhysicsRayQueryParameters3D.create(
 			pos + Vector3.UP * (scatter_size.y / 2.0),
 			pos + Vector3.DOWN * (scatter_size.y / 2.0),
