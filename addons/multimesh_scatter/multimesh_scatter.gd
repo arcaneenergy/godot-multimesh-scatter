@@ -125,7 +125,7 @@ enum ScatterType { BOX, SPHERE }
 
 @export_group("Clustering")
 
-## Clustering will make instance appear in tight groups
+## Clustering will make instances appear in tight groups.
 ## At 0, the placement will be entirely random.
 ## At 1, all instances will be grouped close to each other, according to [code]cluster_density[/code].
 @export_range(0, 1, 0.01) var clustering_amount = 0.0:
@@ -136,7 +136,7 @@ enum ScatterType { BOX, SPHERE }
 
 ## Higher cluster density means clustered instances will be closer together.
 ## At 0 clustering will have no effect.
-## At 1 clustered instance will spawn on top of each other.
+## At 1 clustered instances will spawn on top of each other.
 @export_range(0, 1, 0.01) var cluster_density = 0.5:
 	get: return cluster_density
 	set(value):
@@ -348,14 +348,14 @@ func scatter(force := false) -> void:
 					_rng.randf_range(-scatter_size.x / 2.0, scatter_size.x / 2.0),
 					0.0,
 					_rng.randf_range(-scatter_size.z / 2.0, scatter_size.z / 2.0))
-					
+
 		pos += offset
-		
+
 		if _rng.randf() <= clustering_amount:
-			pos = _last_pos + ((pos - _last_pos) * (1 - cluster_density))
+			pos = _last_pos + ((pos - _last_pos) * (1.0 - cluster_density))
 		else:
 			_last_pos = pos
-		
+
 		var ray := PhysicsRayQueryParameters3D.create(
 			pos + Vector3.UP * (scatter_size.y / 2.0),
 			pos + Vector3.DOWN * (scatter_size.y / 2.0),
