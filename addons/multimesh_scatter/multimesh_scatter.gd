@@ -458,6 +458,7 @@ func _chunkify() -> void:
 		container.add_child(chunk)
 		chunk.owner = container.owner
 		chunk.global_transform.origin = chunk.get_meta('pos')
+		chunk.randomize_seed = true
 		if use_vertex_colors:
 			chunk.manual_update = true
 
