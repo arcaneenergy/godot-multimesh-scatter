@@ -62,7 +62,7 @@ enum ScatterType { BOX, SPHERE }
 
 ## Setting this value will copy over the MeshInstance's Mesh to the MultiMeshInstance3D.
 ## This is just for convenience.
-@export_node_path(MeshInstance3D) var mesh_instance:
+@export_node_path("MeshInstance3D") var mesh_instance:
 	get: return mesh_instance
 	set(value):
 		if value:
