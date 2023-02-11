@@ -1,3 +1,7 @@
+**This is the backported version for Godot 3.5. This branch is stable but no longer maintained.**
+
+---
+
 <img src="addons/multimesh_scatter/icon.svg" width="64" align="left" />
 
 ## MultiMesh Scatter
