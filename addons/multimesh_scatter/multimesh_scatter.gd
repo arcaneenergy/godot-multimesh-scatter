@@ -427,9 +427,9 @@ func scatter(force := false) -> void:
 
 		var iteration_scale := base_scale
 
-		if custom_normal != Vector3(0.0, 0.0, 0.0):
+		if not custom_normal.is_zero_approx():
 			hit.normal = custom_normal.normalized()
-		
+
 		# Angle constraints check
 		if use_angle:
 			var off: float = rad_to_deg((abs(hit.normal.x) + abs(hit.normal.z)) / 2.0)
