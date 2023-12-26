@@ -43,6 +43,16 @@ enum ScatterType { BOX, SPHERE }
 
 		_update()
 
+## Manually set the normal direction of mesh instances.
+## If [code]custom_normal[/code] is set to (0,0,0) then the
+## normal of the terrain will be used by default.
+## [br][br] This vector is automatically normalized.
+@export var custom_normal := Vector3(0.0, 0.0, 0.0):
+	get: return custom_normal
+	set(value):
+		custom_normal = value
+		_update()
+
 ## The placement size of the bounding box.
 ## Enable [code]show_debug_area[/code] to view the size of the bounding box.
 ## [br][br] Note: If the [code]scatter_type[/code] is set to Sphere,
@@ -417,6 +427,9 @@ func scatter(force := false) -> void:
 
 		var iteration_scale := base_scale
 
+		if custom_normal != Vector3(0.0, 0.0, 0.0):
+			hit.normal = custom_normal.normalized()
+		
 		# Angle constraints check
 		if use_angle:
 			var off: float = rad_to_deg((abs(hit.normal.x) + abs(hit.normal.z)) / 2.0)
