@@ -53,6 +53,17 @@ enum ScatterType { BOX, SPHERE }
 		custom_normal = value
 		_update()
 
+## At a value of 1.0, instances will scale uniformly in X, Y and Z.
+## Only the [code]Min Random Size[/code] and [code]Max Random Size[/code]
+## X components will be used for scaling in X, Y and Z
+## [br][br] At a value of 0.0, each axis is scaled individually.
+## [br][br] Values in between are interpolated between these two extremes.
+@export var scale_uniformity : float = 0.0:
+	get: return scale_uniformity
+	set(value):
+		scale_uniformity = clampf(value, 0.0, 1.0)
+		_update()
+
 ## The placement size of the bounding box.
 ## Enable [code]show_debug_area[/code] to view the size of the bounding box.
 ## [br][br] Note: If the [code]scatter_type[/code] is set to Sphere,
@@ -458,14 +469,23 @@ func scatter(force := false) -> void:
 				global_transform.basis.x.cross(hit.normal),
 			).orthonormalized()
 		)
+		
+		var scale_x = _rng.randf_range(min_random_size.x, max_random_size.x)
+		var scale_y = _rng.randf_range(min_random_size.y, max_random_size.y)
+		var scale_z = _rng.randf_range(min_random_size.z, max_random_size.z)
+		
+		# change y and z scaling based on the x scaling, weighted by the scale uniformity factor
+		scale_y = scale_uniformity * scale_x + (1 - scale_uniformity) * scale_y
+		scale_z = scale_uniformity * scale_x + (1 - scale_uniformity) * scale_z
+		
 		t = t\
 			.rotated(Vector3.RIGHT, deg_to_rad(_rng.randf_range(-random_rotation.x, random_rotation.x) + offset_rotation.x))\
 			.rotated(Vector3.UP, deg_to_rad(_rng.randf_range(-random_rotation.y, random_rotation.y) + offset_rotation.y))\
 			.rotated(Vector3.FORWARD, deg_to_rad(_rng.randf_range(-random_rotation.z, random_rotation.z) + offset_rotation.z))\
 			.scaled(iteration_scale * Vector3(
-				_rng.randf_range(min_random_size.x, max_random_size.x),
-				_rng.randf_range(min_random_size.y, max_random_size.y),
-				_rng.randf_range(min_random_size.z, max_random_size.z)))
+				scale_x,
+				scale_y,
+				scale_z))
 		t.origin = hit.position - global_position + offset_position
 		multimesh.set_instance_transform(i, t)
 
