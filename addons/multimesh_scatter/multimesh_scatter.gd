@@ -469,23 +469,20 @@ func scatter(force := false) -> void:
 				global_transform.basis.x.cross(hit.normal),
 			).orthonormalized()
 		)
-		
-		var scale_x = _rng.randf_range(min_random_size.x, max_random_size.x)
-		var scale_y = _rng.randf_range(min_random_size.y, max_random_size.y)
-		var scale_z = _rng.randf_range(min_random_size.z, max_random_size.z)
-		
-		# change y and z scaling based on the x scaling, weighted by the scale uniformity factor
-		scale_y = scale_uniformity * scale_x + (1 - scale_uniformity) * scale_y
-		scale_z = scale_uniformity * scale_x + (1 - scale_uniformity) * scale_z
-		
+
+		var scale_x := _rng.randf_range(min_random_size.x, max_random_size.x)
+		var scale_y := _rng.randf_range(min_random_size.y, max_random_size.y)
+		var scale_z := _rng.randf_range(min_random_size.z, max_random_size.z)
+
+		# Change y and z scaling based on the x scaling, weighted by the scale uniformity factor
+		scale_y = scale_uniformity * scale_x + (1.0 - scale_uniformity) * scale_y
+		scale_z = scale_uniformity * scale_x + (1.0 - scale_uniformity) * scale_z
+
 		t = t\
 			.rotated(Vector3.RIGHT, deg_to_rad(_rng.randf_range(-random_rotation.x, random_rotation.x) + offset_rotation.x))\
 			.rotated(Vector3.UP, deg_to_rad(_rng.randf_range(-random_rotation.y, random_rotation.y) + offset_rotation.y))\
 			.rotated(Vector3.FORWARD, deg_to_rad(_rng.randf_range(-random_rotation.z, random_rotation.z) + offset_rotation.z))\
-			.scaled(iteration_scale * Vector3(
-				scale_x,
-				scale_y,
-				scale_z))
+			.scaled(iteration_scale * Vector3(scale_x, scale_y, scale_z))
 		t.origin = hit.position - global_position + offset_position
 		multimesh.set_instance_transform(i, t)
 
