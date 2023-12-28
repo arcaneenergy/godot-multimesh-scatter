@@ -438,12 +438,13 @@ func scatter(force := false) -> void:
 
 		var iteration_scale := base_scale
 
+		var terrain_normal = hit.normal
 		if not custom_normal.is_zero_approx():
 			hit.normal = custom_normal.normalized()
 
 		# Angle constraints check
 		if use_angle:
-			var off: float = rad_to_deg((abs(hit.normal.x) + abs(hit.normal.z)) / 2.0)
+			var off: float = rad_to_deg((abs(terrain_normal.x) + abs(terrain_normal.z)) / 2.0)
 			if not off < angle_degrees:
 				iteration_scale = Vector3.ZERO
 
