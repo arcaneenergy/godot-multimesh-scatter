@@ -329,8 +329,6 @@ func _ready() -> void:
 	_update()
 
 func _notification(what: int) -> void:
-	if not is_inside_tree():
-		return
 	if NOTIFICATION_TRANSFORM_CHANGED:
 		_update()
 
