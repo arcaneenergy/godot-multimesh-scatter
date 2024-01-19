@@ -381,6 +381,8 @@ func _update_debug_area_size() -> void:
 				_debug_draw_instance.mesh.size = scatter_size
 
 func _update(force := false) -> void:
+	if not is_inside_tree():
+		return
 	if !_space:
 		return
 	scatter(force)
