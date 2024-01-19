@@ -329,7 +329,7 @@ func _ready() -> void:
 	_update()
 
 func _notification(what: int) -> void:
-	if NOTIFICATION_TRANSFORM_CHANGED:
+	if what == NOTIFICATION_TRANSFORM_CHANGED:
 		_update()
 
 func _ensure_has_mm() -> bool:
