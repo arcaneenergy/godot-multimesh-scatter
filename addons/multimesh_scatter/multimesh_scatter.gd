@@ -381,7 +381,8 @@ func _update_debug_area_size() -> void:
 				_debug_draw_instance.mesh.size = scatter_size
 
 func _update(force := false) -> void:
-	if !_space: return
+	if !_space:
+		return
 	scatter(force)
 	
 	if Engine.is_editor_hint():
