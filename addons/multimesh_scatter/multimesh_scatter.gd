@@ -37,10 +37,10 @@ enum ScatterType { BOX, SPHERE }
 	get: return scatter_type
 	set(value):
 		scatter_type = value
-
+		
 		if Engine.is_editor_hint():
 			_create_debug_area()
-
+		
 		_update()
 
 ## Manually set the normal direction of mesh instances.
@@ -294,7 +294,7 @@ var _chunk_container: Node3D
 	get: return show_debug_area
 	set(value):
 		show_debug_area = value
-
+		
 		if value && Engine.is_editor_hint():
 			_create_debug_area()
 		else:
@@ -325,12 +325,12 @@ func _ready() -> void:
 	else:
 		set_notify_transform(false)
 		set_ignore_transform_notification(true)
-
+	
 	_update()
 
 func _notification(what: int) -> void:
-	if !is_inside_tree(): return
-
+	if not is_inside_tree():
+		return
 	if NOTIFICATION_TRANSFORM_CHANGED:
 		_update()
 
@@ -348,26 +348,26 @@ func _delete_debug_area() -> void:
 func _create_debug_area() -> void:
 	_delete_debug_area()
 	_debug_draw_instance = MeshInstance3D.new()
-
+	
 	var material := StandardMaterial3D.new()
 	_debug_draw_instance.material_override = material
-
+	
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = Color(1.0, 0.0, 0.0, 0.0784313725)
 	material.no_depth_test = true
-
+	
 	var mesh: Mesh
 	match scatter_type:
 		ScatterType.SPHERE:
 			mesh = SphereMesh.new()
 		ScatterType.BOX, _:
 			mesh = BoxMesh.new()
-
+	
 	_debug_draw_instance.mesh = mesh
 	_debug_draw_instance.visible = show_debug_area
-
+	
 	add_child(_debug_draw_instance)
 	_update_debug_area_size()
 
@@ -383,27 +383,27 @@ func _update_debug_area_size() -> void:
 func _update(force := false) -> void:
 	if !_space: return
 	scatter(force)
-
+	
 	if Engine.is_editor_hint():
 		_update_debug_area_size()
 
 func scatter(force := false) -> void:
 	if use_vertex_colors and not force:
 		return
-
+	
 	if not _ensure_has_mm():
 		printerr("[MultiMeshScatter]: The MultiMeshInstance3D doesn't have an assigned mesh.")
 		return
-
+	
 	_rng.state = 0
 	_rng.seed = seed
-
+	
 	multimesh.instance_count = 0
 	multimesh.instance_count = count
-
+	
 	for i in range(count):
 		var offset := Vector3.ZERO
-
+		
 		match scatter_type:
 			ScatterType.SPHERE:
 				var radius := sqrt(_rng.randf()) * (scatter_size.x / 2.0)
@@ -417,9 +417,9 @@ func scatter(force := false) -> void:
 					_rng.randf_range(-scatter_size.x / 2.0, scatter_size.x / 2.0),
 					0.0,
 					_rng.randf_range(-scatter_size.z / 2.0, scatter_size.z / 2.0))
-
+		
 		var pos := global_position + offset
-
+		
 		if _rng.randf() <= clustering_amount:
 			if cluster_out_of_bounds:
 				pos = _last_pos + offset * (1 - cluster_density)
@@ -427,27 +427,27 @@ func scatter(force := false) -> void:
 				pos = _last_pos + ((pos - _last_pos) * (1 - cluster_density))
 		else:
 			_last_pos = pos
-
+		
 		var ray := PhysicsRayQueryParameters3D.create(
 			pos + Vector3.UP * (scatter_size.y / 2.0),
 			pos + Vector3.DOWN * (scatter_size.y / 2.0),
 			collision_mask)
-
+		
 		var hit := _space.intersect_ray(ray)
 		if hit.is_empty(): continue
-
+		
 		var iteration_scale := base_scale
-
+		
 		var terrain_normal = hit.normal
 		if not custom_normal.is_zero_approx():
 			hit.normal = custom_normal.normalized()
-
+		
 		# Angle constraints check
 		if use_angle:
 			var off: float = rad_to_deg((abs(terrain_normal.x) + abs(terrain_normal.z)) / 2.0)
 			if not off < angle_degrees:
 				iteration_scale = Vector3.ZERO
-
+		
 		# Vertex color placement
 		if iteration_scale > Vector3.ZERO and use_vertex_colors:
 			var mesh := _find_mesh(hit.collider)
@@ -462,7 +462,7 @@ func scatter(force := false) -> void:
 					iteration_scale = Vector3.ZERO
 			else:
 				printerr("[MultiMeshScatter]: Cannot find mesh for the vertex color check. Make sure '", hit.collider.name, "' has a MeshInstance3D as a parent.")
-
+		
 		var t := Transform3D(
 			Basis(
 				hit.normal.cross(global_transform.basis.z),
@@ -470,15 +470,15 @@ func scatter(force := false) -> void:
 				global_transform.basis.x.cross(hit.normal),
 			).orthonormalized()
 		)
-
+		
 		var scale_x := _rng.randf_range(min_random_size.x, max_random_size.x)
 		var scale_y := _rng.randf_range(min_random_size.y, max_random_size.y)
 		var scale_z := _rng.randf_range(min_random_size.z, max_random_size.z)
-
+		
 		# Change y and z scaling based on the x scaling, weighted by the scale uniformity factor
 		scale_y = scale_uniformity * scale_x + (1.0 - scale_uniformity) * scale_y
 		scale_z = scale_uniformity * scale_x + (1.0 - scale_uniformity) * scale_z
-
+		
 		t = t\
 			.rotated(Vector3.RIGHT, deg_to_rad(_rng.randf_range(-random_rotation.x, random_rotation.x) + offset_rotation.x))\
 			.rotated(Vector3.UP, deg_to_rad(_rng.randf_range(-random_rotation.y, random_rotation.y) + offset_rotation.y))\
@@ -490,14 +490,14 @@ func scatter(force := false) -> void:
 func _get_closest_vertex(mdt: MeshDataTool, mesh_pos: Vector3, hit_pos: Vector3) -> int:
 	var closest_dist := INF
 	var closest_vertex := -1
-
+	
 	for v in range(mdt.get_vertex_count()):
 		var v_pos := mdt.get_vertex(v) + mesh_pos
 		var tmp := hit_pos.distance_squared_to(v_pos)
 		if tmp <= closest_dist:
 			closest_dist = tmp
 			closest_vertex = v
-
+	
 	return closest_vertex
 
 func _find_mesh(node: Node) -> MeshInstance3D:
@@ -510,31 +510,31 @@ func _chunkify() -> void:
 	if not container:
 		printerr("[MultiMeshScatter]: No container found for the chunks.")
 		return
-
+	
 	_empty_chunks()
 	visible = true
-
+	
 	var chunks := []
 	var size := Vector2(total_size.x / chunk_count.x, total_size.z / chunk_count.y)
 	for i in chunk_count.x:
 		for j in chunk_count.y:
 			var chunk := duplicate()
 			chunk.multimesh = null
-
+			
 			chunk.set_meta('pos', Vector3(
 				global_transform.origin.x + (i * size.x) - (total_size.x/2) + (size.x/2),
 				global_transform.origin.y,
 				global_transform.origin.z + (j * size.y) - (total_size.z/2) + (size.y/2)
 			))
-
+			
 			chunk._ensure_has_mm()
 			chunk.multimesh.mesh = multimesh.mesh
-
+			
 			chunk.count = count_per_chunk
 			chunk.scatter_size = Vector3(size.x, scatter_size.y, size.y)
-
+			
 			chunks.push_back(chunk)
-
+	
 	visible = false
 	for chunk in chunks:
 		container.add_child(chunk)
